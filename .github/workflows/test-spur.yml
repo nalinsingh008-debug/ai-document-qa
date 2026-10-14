@@ -1,0 +1,41 @@
+
+name: Test SPUR API
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-spur:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install OpenAI SDK
+        run: pip install openai
+
+      - name: Test SPUR API
+        env:
+          SPUR_API_KEY: ${{ secrets.SPUR_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os
+          from openai import OpenAI
+
+          client = OpenAI(
+              base_url="https://ai.spuric.com/v1",
+              api_key=os.environ["SPUR_API_KEY"]
+          )
+
+          response = client.chat.completions.create(
+              model="spur-glm-5-2",
+              messages=[
+                  {"role": "user", "content": "Reply with exactly: SPUR API test successful"}
+              ],
+              temperature=0
+          )
+
+          print(response.choices[0].message.content)
+          PY
